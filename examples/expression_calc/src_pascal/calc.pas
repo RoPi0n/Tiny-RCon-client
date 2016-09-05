@@ -4,7 +4,6 @@ program strcalc;
 uses sysutils;
 
 function eval(s:string):string;
-  label eval_end;
  
   const
    op_add='+';
