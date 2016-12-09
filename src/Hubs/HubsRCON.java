@@ -58,7 +58,7 @@ public class HubsRCON {
          case ("cls"):System.out.print("\033[H\033[2J");System.out.flush();break;
          case ("exit"):System.exit(0);
      }
-     return "Hubs.RCon comand does'n t exist!";
+     return "Hubs.RCon command does'n t exist!";
     }
     
     public static String ParseMCResultString(String s){
@@ -70,16 +70,13 @@ public class HubsRCON {
       return s;  
     }
     
-    public static void main(String[] args) {
-      if (args.length==0)
-       {
-        System.out.println("Hubs soft.\nAutor: pavel151\nMail: pavel151@inbox.ru\nUse: <HubsRCON> <IP> <PORT> <PASSWORD>");
-        System.exit(0);
-       }
-        Scanner sc = new Scanner(System.in);
+    public static Scanner sc = new Scanner(System.in);
+    
+    public static void runRCon(String IP, int Port, byte[] password)
+    {
         try {
-            Rcon rcon=new Rcon(args[0], Integer.parseInt(args[1]), args[2].getBytes());
-            System.out.println("Hubs.RCON connected to "+args[0]+":"+args[1]+" successful!");
+            Rcon rcon = new Rcon(IP, Port, password);
+            System.out.println("# HubsRCon connected to "+IP+":"+Port+" successful!");
             String r;
             while(true){
                 System.out.print("> ");
@@ -102,4 +99,42 @@ public class HubsRCON {
         }
     }
     
-}
+    public static void main(String[] args) {
+      if (args.length==0)
+       {
+        System.out.println("[HUBS.DEV]\n Hubs RCon client v1.1\n http://hubs.cf\n Autor: pavel151\n Mail: pavel151@inbox.ru\nUse: <HubsRCON> [Args]\nArgs:\n -connect <IP> <Port> <Password>\n -send <IP> <Port> <Password> <Comand>\n________________________\nPress enter...");
+        sc.nextLine();
+        System.out.print("Connect to RCon server.\nIP      : ");
+        String IP=sc.nextLine();
+        System.out.print("Port    : ");
+        int Port=sc.nextInt();
+        System.out.print("Password:");
+        String Pass=sc.nextLine();
+        runRCon(IP, Port, Pass.getBytes());
+       }
+       switch (args[0].toLowerCase()){
+           case "-connect":
+               runRCon(args[1], Integer.parseInt(args[2]), args[3].getBytes());
+               break;
+           case "-send":
+               try {
+                Rcon rcon = new Rcon(args[1], Integer.parseInt(args[2]), args[3].getBytes());
+                System.out.println("# HubsRCon connected to "+args[1]+":"+args[2]+" successful!\n# Sending command \""+args[4]+"\"...");
+                String r=ParseMCResultString(rcon.command(args[4]));
+                   System.out.println("# Success!");
+                if (r.length()>0){
+                 System.out.println("$ "+r);
+                }
+                   System.out.println("# Finish!");
+               } catch (IOException ex) {
+                 Logger.getLogger(HubsRCON.class.getName()).log(Level.SEVERE, null, ex);
+               } catch (AuthenticationException ex) {
+                 Logger.getLogger(HubsRCON.class.getName()).log(Level.SEVERE, null, ex);
+               }
+               break;
+           default:
+               System.out.println("# Error! Invalid arguments!");
+               break;
+       } 
+     
+    }
